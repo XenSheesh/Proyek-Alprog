@@ -1,6 +1,6 @@
 #include <iostream>
 #include <sl.h>
-#include "entities.h"
+#include "menu.h"
 #include <vector>
 #include <random>
 #include <Windows.h>
@@ -78,11 +78,40 @@ void colorcyan()
 	slSetForeColor(0, 1, 1, 1);
 }
 
+// Fungsi untuk memeriksa apakah titik (x, y) berada di dalam area persegi panjang dengan pusat (centerX, centerY) dan ukuran (width, height)
+bool isPointInsideRect(int x, int y, int centerX, int centerY, int width, int height)
+{
+	int setengahLebar = width / 2;
+	int setengahTinggi = height / 2;
+	return x >= centerX - setengahLebar && x <= centerX + setengahLebar && y >= centerY - setengahTinggi && y <= centerY + setengahTinggi;
+}
+
+void drawGlitchText(int font, int fontSize, const string& text, double x, double y)
+{
+	// Original text
+	slSetTextAlign(SL_ALIGN_LEFT);
+	slSetFont(font, fontSize);
+	coloryellow(); // Yellow Color
+	slText(x, y, text.c_str());
+
+	// Glitch effect 1
+	slSetTextAlign(SL_ALIGN_LEFT);
+	slSetFont(font, fontSize);
+	coloryellow(); // Adjust color as needed
+	slText(x - 2, y - 2, text.c_str());
+
+	// Glitch effect 2
+	slSetTextAlign(SL_ALIGN_LEFT);
+	slSetFont(font, fontSize);
+	coloryellow(); // Adjust color as needed
+	slText(x + 2, y + 2, text.c_str());
+}
+
 int main()
 {
 	// Ukuran Windows
 	slWindow(1920, 1200, "Catch The Ball", 0);
-	backsound();
+	//backsound();
 
 	// Random
 	random_device rd;
@@ -203,6 +232,13 @@ int main()
 	js.posX = 380;
 	js.posY = 600;
 
+	int duck = slLoadTexture("duck.png");
+
+	// Position Duck
+	Duck d;
+	d.posX = 1930;
+	d.posY = 170;
+
 	// Jenis Font
 	int font1 = slLoadFont("RoadPixel.ttf");
 	int font2 = slLoadFont("Crima.ttf");
@@ -215,26 +251,14 @@ int main()
 	f1.posX = 560;
 	f1.posY = 580;
 
-	// Button
-	vector <int> imgBtn(5);
-	{
-		imgBtn[0] = slLoadTexture("play.png");
-		imgBtn[1] = slLoadTexture("settings.png");
-		imgBtn[2] = slLoadTexture("noorquit.png");
-		imgBtn[3] = slLoadTexture("credit.png");
-		imgBtn[4] = slLoadTexture("yes.png");
-	}
+	// Teks Untuk Press
+	string pressSpaceText = "Press Space To Continue";
 
-	// Position Button
-	IntiButton ib;
-	ib.posX1 = 480;
-	ib.posX2 = 680;
-	ib.posX3 = 880;
-	ib.posY = 320;
+	// Letak Coordinate
+	int windowWidth = 680;
+	int windowHeight = 320;
 
-	Credit cr;
-	cr.posX = 1310;
-	cr.posY = 85;
+	double blinkTime = 0.0;
 
 	double angle = 0;
 
@@ -262,6 +286,17 @@ int main()
 
 		// Ground
 		// slSprite(imgBack[1], gd.posX, gd.posY, 1920, 400);
+
+		// Memanggil Duck
+		normalcolor();
+		slSprite(duck, d.posX, d.posY, 288, 64);
+
+		d.posX -= 2.0; // -- Kecepatannya
+
+		if (d.posX <= -140)
+		{
+			d.posX = 1925;
+		}
 
 		// Cloud
 		for (Cloud& c : clouds)
@@ -291,7 +326,7 @@ int main()
 			if (BirdDelay <= 0)
 			{
 				bird1Frame = (bird1Frame + 1) % Bird1Left.size();
-				BirdDelay = 0.2; // Delay
+				BirdDelay = 0.25; // Delay
 			}
 
 		}
@@ -334,22 +369,38 @@ int main()
 		slSetFont(font1, 82);
 
 		// Input Text "Catch The Ball"
-		coloryellow(); // Yellow Color
-		slText(f1.posX, f1.posY, "CATCH THE BALL");
+		drawGlitchText(font1, 82, "CATCH THE BALL", f1.posX, f1.posY);
 
-		// Memanggil Button
-		normalcolor(); // Default Color
-		slSprite(imgBtn[0], ib.posX1, ib.posY, 102, 106);
-		slSprite(imgBtn[1], ib.posX2, ib.posY, 102, 106);
-		slSprite(imgBtn[2], ib.posX3, ib.posY, 102, 106);
+		// Hitung waktu berkedip
+		blinkTime += slGetDeltaTime();
 
-		// Memanggil Button Credit
-		slSprite(imgBtn[3], cr.posX, cr.posY, 51, 53);
+        // Tampilkan teks dan berkedip
+		if (static_cast<int>(blinkTime) % 2 == 0) 
+		{
+			slSetTextAlign(SL_ALIGN_CENTER);
+			slSetFont(font3, 54);
+			colorblack();
+			slText(windowWidth, windowHeight, "Press Space to Continue");
+		}
+
+        // Periksa apakah tombol spasi ditekan
+        if (slGetKey(' '))
+        {
+			// Suara
+			select();
+
+            // Lakukan aksi yang diinginkan saat tombol spasi ditekan
+            cout << "Space Pressed! Do something..." << endl;
+
+            // Contoh: Keluar dari loop atau lakukan aksi lainnya
+            //break;
+        }
 
 		// Render
 		slRender();
 	}
 
+	slClose();
 	return 0;
 
 }

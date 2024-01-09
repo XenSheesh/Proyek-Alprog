@@ -43,22 +43,22 @@ struct JariSun
 	double posY;
 };
 
+struct Duck
+{
+	double posX;
+	double posY;
+};
+
 struct Font1
 {
 	double posX;
 	double posY;
 };
 
-struct IntiButton
+struct menuButton 
 {
-	double posX1;
-	double posX2;
-	double posX3;
-	double posY;
-};
-
-struct Credit
-{
-	double posX;
-	double posY;
+	int posX;
+	int posY;
+	int width;
+	int height;
 };
